@@ -43,6 +43,7 @@
         android:weightSum="2">
 
         <ImageButton
+            android:id="@+id/gallery_image_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_image"
@@ -50,6 +51,7 @@
             android:layout_weight="1"/>
 
         <ImageButton
+            android:id="@+id/flash_image_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_flash"

@@ -17,7 +17,7 @@ import java.io.IOException
 
 class QueueR (activity: Activity){
     init {
-        activity.setContentView(R.layout.activity_scan)
+        activity.setContentView(R.layout.scan_view)
         create(activity)
     }
 
@@ -27,7 +27,7 @@ class QueueR (activity: Activity){
             .build()
 
         val cameraSource = CameraSource.Builder(activity, barcodeDetector)
-            .setRequestedPreviewSize(1920, 1080)// this.getwidth()/ this.getHeight()
+            .setRequestedPreviewSize(1920, 1080)// this.getWidth()/ this.getHeight()
             .setAutoFocusEnabled(true)
             .build()
 
@@ -53,7 +53,7 @@ class QueueR (activity: Activity){
 
                         cameraSource.start(scanSurfaceView.holder)
                     }else{
-//                        ActivityCompat.requestPermissions(this@ScanActivity,
+//                        ActivityCompat.requestPermissions(this@ScanView,
 //                            String[]{ Manifest.permission.CAMERA }, REQUEST_CAMERA_PERMISSION)
                     }
                 } catch (e: IOException) {

@@ -7,7 +7,45 @@ Design inspiration and credit goes to ([Maulana Farhan 🐣 | Dribbble](https://
 
 
 
+## Setup
+
+Add it in your root `build.gradle` at the end of repositories:
+
+```groovy
+allprojects {
+    repositories {
+        //...omitted for brevity
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+
+
+Add the dependency
+
+```groovy
+	dependencies {
+	        implementation "com.github.kojofosu:Queue-R:$latest-release"
+	}
+```
+
+
+
+## Usage
+
+```xml
+    <com.mcdev.queuer.ScanView
+        android:id="@+id/queuer_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+```
+
+
+
 ### Licensed under the [MIT License](LICENSE)
+
 ```
 MIT License
 

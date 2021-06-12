@@ -1,7 +1,7 @@
 # Queue-R
 An android library to help implement a QR scanner interface
 
-Designed credit goes to [Maulana Farhan 🐣]([Maulana Farhan 🐣 | Dribbble](https://dribbble.com/maulanafaa)) . Design inspired by 
+Design inspiration and credit goes to ([Maulana Farhan 🐣 | Dribbble](https://dribbble.com/maulanafaa)) .
 
 ![image](resources/inspired_image.jpg)
 

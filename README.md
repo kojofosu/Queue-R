@@ -26,7 +26,7 @@ Add the dependency
 
 ```groovy
 	dependencies {
-	        implementation "com.github.kojofosu:Queue-R:$latest-release"
+	        implementation "com.github.kojofosu:Queue-R:$latest_release"
 	}
 ```
 

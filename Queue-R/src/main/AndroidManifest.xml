@@ -12,4 +12,15 @@
 <!--    <uses-permission android:name="android.permission.FLASHLIGHT"/>-->
 
     <uses-permission android:name="android.permission.CAMERA" />
+
+
+    <application
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.QueueR">
+
+        <meta-data
+            android:name="com.google.android.gms.vision.DEPENDENCIES"
+            android:value="barcode"/>
+    </application>
 </manifest>

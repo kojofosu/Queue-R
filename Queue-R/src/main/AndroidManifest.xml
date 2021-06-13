@@ -1,26 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
     package="com.mcdev.queuer">
-
-<!--    &lt;!&ndash;features&ndash;&gt;-->
-<!--    <uses-feature android:name="android.hardware.camera2" android:required="true"/>-->
-<!--    <uses-feature android:name="android.hardware.camera.autofocus" />-->
-<!--    <uses-feature android:name="android.hardware.camera.flash"/>-->
-
-<!--    &lt;!&ndash;permissions&ndash;&gt;-->
-<!--    <uses-permission android:name="android.permission.CAMERA" />-->
-<!--    <uses-permission android:name="android.permission.FLASHLIGHT"/>-->
-
-    <uses-permission android:name="android.permission.CAMERA" />
-
-
-    <application
-        android:allowBackup="true"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.QueueR">
-
-        <meta-data
-            android:name="com.google.android.gms.vision.DEPENDENCIES"
-            android:value="barcode"/>
-    </application>
 </manifest>

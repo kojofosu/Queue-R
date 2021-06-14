@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.util.isNotEmpty
@@ -45,6 +46,7 @@ class ScanView @JvmOverloads constructor(
     private lateinit var surfaceHolder: SurfaceHolder
     var isFlashEnabled: Boolean = false
     private var listener: QueueRListener? = null
+    private var barcodeDetector: BarcodeDetector? = null
 
     constructor(
         context: Context,
@@ -67,9 +69,10 @@ class ScanView @JvmOverloads constructor(
     /**
     *Initialize scan view
      *  */
-    fun initScanView(context: Context) {
+    @RequiresPermission("android.permission.CAMERA", conditional = false)
+    private fun initScanView(context: Context) {
 
-        val detector = initBarcodeDetector(context, Barcode.QR_CODE)
+        val detector = setBarcodeDetector(context, Barcode.QR_CODE)
 
 
         val cameraSource = CameraSource.Builder(context,detector)
@@ -108,12 +111,17 @@ class ScanView @JvmOverloads constructor(
                 ) {
                     cameraSource.start(holder)
 
+                    binding.flashAnimationView.frame = 60
                     binding.flashImageButton.setOnClickListener {
                         if (isFlashEnabled) {
                             isFlashEnabled = false
+                            binding.flashAnimationView.setMinAndMaxFrame(150, 180)
+                            binding.flashAnimationView.playAnimation()
                             flashOnButton(isFlashEnabled, cameraSource)
                         } else {
                             isFlashEnabled = true
+                            binding.flashAnimationView.setMinAndMaxFrame(60,90)
+                            binding.flashAnimationView.playAnimation()
                             flashOnButton(isFlashEnabled, cameraSource)
                         }
                     }
@@ -316,7 +324,11 @@ class ScanView @JvmOverloads constructor(
 //        }
 //    }
 
-    fun initBarcodeDetector(context: Context, barcodeType: Int): BarcodeDetector {
+    fun setBarcodeDetector(barcodeDetector: BarcodeDetector): BarcodeDetector {
+        this.barcodeDetector = barcodeDetector
+        return barcodeDetector
+    }
+    fun setBarcodeDetector(context: Context, barcodeType: Int): BarcodeDetector {
         return BarcodeDetector.Builder(context)
             .setBarcodeFormats(barcodeType)
             .build()
@@ -380,7 +392,7 @@ class ScanView @JvmOverloads constructor(
 
     fun decode(bitmap: Bitmap, barcodeType: Int): Barcode {
         //Setup the barcode detector
-        val barcodeDetector = initBarcodeDetector(context, barcodeType)
+        val barcodeDetector = setBarcodeDetector(context, barcodeType)
 
         if (!barcodeDetector.isOperational) {
             Log.e(TAG, "decode: barcode is not functional" )
@@ -396,7 +408,7 @@ class ScanView @JvmOverloads constructor(
 
     fun decode(bitmap: Bitmap): Barcode {
         //Setup the barcode detector
-        val barcodeDetector = initBarcodeDetector(context, Barcode.QR_CODE)
+        val barcodeDetector = setBarcodeDetector(context, Barcode.QR_CODE)
 
         if (!barcodeDetector.isOperational) {
             Log.e(TAG, "decode: barcode is not functional" )

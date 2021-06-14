@@ -1,1 +1,5 @@
-<resources></resources>
+<resources>
+    <string name="gallery_image_button">gallery image button</string>
+    <string name="flash_image_button">flash image button</string>
+    <string name="scan">Scan</string>
+</resources>

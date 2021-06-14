@@ -52,7 +52,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     //google vision
-    implementation "com.google.android.gms:play-services-vision:$googleVisionVersion"
+    api "com.google.android.gms:play-services-vision:$googleVisionVersion"
 
     //Zxing core
     implementation 'com.google.zxing:core:3.3.3'

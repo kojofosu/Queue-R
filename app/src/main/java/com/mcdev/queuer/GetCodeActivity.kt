@@ -13,7 +13,7 @@ class GetCodeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_get_code)
 
-    val etextV = findViewById<TextView>(R.id.etext)
+    val etextV = findViewById<TextView>(R.id.content_tv)
     var barcodeValue :String
     if (intent != null) {
         barcodeValue = intent.extras!!.getString("one", "")

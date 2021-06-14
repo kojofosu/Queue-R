@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity(){
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
 //            val result = binding.scanView.decode(uri!!)
             val bitmp = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-            val result = binding.scanView.decode(bitmp)
+            val result: String = binding.scanView.decode(bitmp).displayValue
 
                 val intent = Intent(applicationContext, GetCodeActivity::class.java)
                 intent.putExtra("one", result)

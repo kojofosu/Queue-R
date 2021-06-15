@@ -59,12 +59,24 @@ class ScanView @JvmOverloads constructor(
     init {
         //load style attributes
         val attributes = context.theme.obtainStyledAttributes(attrs, R.styleable.ScanView, defStyleAttr, 0)
+
+        val flashIconOverlay = attributes.getBoolean(R.styleable.ScanView_setFlashIconOverlay, true)
+
         initScanView(context)
 
-        /*Gallery Button*/
-        binding.galleryImageButton.setOnClickListener { /*TODO not yet implemented*/ }
+        setFlashIconOverlay(flashIconOverlay)
     }
 
+    /**
+    * Sets visibility of the flash icon overlay over the scan view
+     * @param mode
+    **/
+    fun setFlashIconOverlay(boolean: Boolean) {
+        when (boolean) {
+            true -> binding.flashAnimationView.visibility = VISIBLE
+            else -> binding.flashAnimationView.visibility = GONE
+        }
+    }
 
     /**
     *Initialize scan view

@@ -10,12 +10,15 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.barcode.Barcode
+import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.mcdev.queuer.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(){
 
     private lateinit var binding: ActivityMainBinding
+    private val REQUEST_CAMERA = 1234
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,29 +26,40 @@ class MainActivity : AppCompatActivity(){
         val view = binding.root
         setContentView(view)
 
+        val detector: BarcodeDetector = BarcodeDetector.Builder(this)
+            .setBarcodeFormats(Barcode.QR_CODE)
+            .build()
+
+        val cameraSource =  CameraSource.Builder(this,detector)
+            .setRequestedFps(25f)
+            .setAutoFocusEnabled(true).build()
+
+
+        binding.scanView.apply {
+            setBarcodeDetector(detector)
+            setCameraSource(cameraSource, detector)
+            setFlashIconOverlay(true)
+        }
+
 
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
-//            val result = binding.scanView.decode(uri!!)
-            val bitmp = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-            val result: String = binding.scanView.decode(bitmp).displayValue
+            val result = binding.scanView.decode(uri!!)
 
-                val intent = Intent(applicationContext, GetCodeActivity::class.java)
-                intent.putExtra("one", result)
-                startActivity(intent)
+            val intent = Intent(applicationContext, GetCodeActivity::class.java)
+            intent.putExtra("one", result)
+            startActivity(intent)
 
         }
 
         val imgbtn = binding.scanView.getGalleryButton()
         imgbtn.setOnClickListener {
-            Toast.makeText(applicationContext, "hey", Toast.LENGTH_LONG).show()
             intent = Intent()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
-//            startActivityForResult(Intent.createChooser(intent, "Select Pic"), 111)
-
 
             getContent.launch("image/*")
         }
+
 
 
         binding.scanView.setQueueRListener(object: QueueRListener{
@@ -62,9 +76,9 @@ class MainActivity : AppCompatActivity(){
         super.onStart()
         if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), Companion.REQUEST_CAMERA)
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA)
         } else {
-
+            binding.scanView.startScan()
         }
     }
 
@@ -77,13 +91,8 @@ class MainActivity : AppCompatActivity(){
         if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
             && requestCode == REQUEST_CAMERA) {
 //                binding.scanView.testSurface()
-        } else {
-//            NavHostFragment.findNavController(this).navigateUp()
         }
     }
 
-    companion object {
-        const val REQUEST_CAMERA = 1729
-    }
 
 }

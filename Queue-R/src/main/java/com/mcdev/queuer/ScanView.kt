@@ -1,9 +1,8 @@
 package com.mcdev.queuer
 
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.hardware.Camera
@@ -14,10 +13,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.widget.ImageButton
-import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.util.isNotEmpty
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
@@ -46,7 +43,8 @@ class ScanView @JvmOverloads constructor(
     private lateinit var surfaceHolder: SurfaceHolder
     var isFlashEnabled: Boolean = false
     private var listener: QueueRListener? = null
-    private var barcodeDetector: BarcodeDetector? = null
+    private lateinit var barcodeDetector: BarcodeDetector
+    private lateinit var cameraSource: CameraSource
 
     constructor(
         context: Context,
@@ -62,37 +60,31 @@ class ScanView @JvmOverloads constructor(
 
         val flashIconOverlay = attributes.getBoolean(R.styleable.ScanView_setFlashIconOverlay, true)
 
-        initScanView(context)
-
         setFlashIconOverlay(flashIconOverlay)
     }
 
+
     /**
     * Sets visibility of the flash icon overlay over the scan view
-     * @param mode
+     * @param mode boolean
     **/
-    fun setFlashIconOverlay(boolean: Boolean) {
-        when (boolean) {
+    @Suppress("MemberVisibilityCanBePrivate")
+    fun setFlashIconOverlay(mode: Boolean) {
+        when (mode) {
             true -> binding.flashAnimationView.visibility = VISIBLE
             else -> binding.flashAnimationView.visibility = GONE
         }
     }
 
     /**
-    *Initialize scan view
+    *Initialize scan view and starts scan
+     * @param barcodeDetector BarcodeDetector
+     * @param cameraSource CameraSource
      *  */
     @RequiresPermission("android.permission.CAMERA", conditional = false)
-    private fun initScanView(context: Context) {
+    fun startScan(barcodeDetector: BarcodeDetector = this.barcodeDetector, cameraSource: CameraSource = this.cameraSource) {
 
-        val detector = setBarcodeDetector(context, Barcode.QR_CODE)
-
-
-        val cameraSource = CameraSource.Builder(context,detector)
-            .setRequestedFps(25f)
-            .setAutoFocusEnabled(true).build()
-
-
-        detector.setProcessor(object : Detector.Processor<Barcode>{
+        barcodeDetector.setProcessor(object : Detector.Processor<Barcode>{
             override fun release() {
 
             }
@@ -102,8 +94,9 @@ class ScanView @JvmOverloads constructor(
                     val barcode = detections.detectedItems
                     if (barcode?.size() ?: 0 > 0) {
                         // show barcode content value
-                            listener?.onRetrieved(barcode.valueAt(0))
+                        listener?.onRetrieved(barcode.valueAt(0))
                         Log.d(TAG, "receiveDetections: " + barcode?.valueAt(0)?.displayValue)
+                        cameraSource.stop()
                         cameraSource.release()//todo
                     }
                 }
@@ -114,32 +107,23 @@ class ScanView @JvmOverloads constructor(
 
 
         binding.scanSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+            @SuppressLint("MissingPermission")
             override fun surfaceCreated(holder: SurfaceHolder) {
-                // check camera permission for api version 23
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    cameraSource.start(holder)
+                cameraSource.start(holder)
 
-                    binding.flashAnimationView.frame = 60
-                    binding.flashImageButton.setOnClickListener {
-                        if (isFlashEnabled) {
-                            isFlashEnabled = false
-                            binding.flashAnimationView.setMinAndMaxFrame(150, 180)
-                            binding.flashAnimationView.playAnimation()
-                            flashOnButton(isFlashEnabled, cameraSource)
-                        } else {
-                            isFlashEnabled = true
-                            binding.flashAnimationView.setMinAndMaxFrame(60,90)
-                            binding.flashAnimationView.playAnimation()
-                            flashOnButton(isFlashEnabled, cameraSource)
-                        }
+                binding.flashAnimationView.frame = 60
+                binding.flashImageButton.setOnClickListener {
+                    if (isFlashEnabled) {
+                        isFlashEnabled = false
+                        playFlashAnimation(150, 180)
+                        flashOnButton(isFlashEnabled, cameraSource)
+                    } else {
+                        isFlashEnabled = true
+                        playFlashAnimation(60, 90)
+                        flashOnButton(isFlashEnabled, cameraSource)
                     }
-
                 }
-                else Toast.makeText(context, "Get permissions", Toast.LENGTH_LONG).show()
+
             }
 
             override fun surfaceChanged(
@@ -152,19 +136,24 @@ class ScanView @JvmOverloads constructor(
             }
 
             override fun surfaceDestroyed(holder: SurfaceHolder) {
-                cameraSource.stop()            }
+                cameraSource.stop()
+                cameraSource.release()
+            }
         })
     }
+
+    private fun playFlashAnimation(startFrame: Int, endFrame: Int) {
+        binding.flashAnimationView.setMinAndMaxFrame(startFrame, endFrame)
+        binding.flashAnimationView.playAnimation()
+    }
+
     private fun getCamera(cameraSource: CameraSource): Camera? {
         val declaredFields: Array<Field> = CameraSource::class.java.declaredFields
         for (field in declaredFields) {
             if (field.type === Camera::class.java) {
                 field.isAccessible = true
                 try {
-                    val camera = field.get(cameraSource) as Camera
-                    return if (camera != null) {
-                        camera
-                    } else null
+                    return field.get(cameraSource) as Camera
                 } catch (e: IllegalAccessException) {
                     e.printStackTrace()
                 }
@@ -173,6 +162,7 @@ class ScanView @JvmOverloads constructor(
         }
         return null
     }
+
     private fun flashOnButton(flashMode: Boolean, mCameraSource: CameraSource) {
         val camera = getCamera(mCameraSource)
         if (camera != null) {
@@ -187,188 +177,59 @@ class ScanView @JvmOverloads constructor(
         }
     }
 
-
-//    fun surfaceView() {
-//        binding.scanSurfaceView.holder.addCallback(object: SurfaceHolder.Callback{
-//            override fun surfaceCreated(holder: SurfaceHolder) {
-////                startCameraPreview2(false)
-//            }
-//
-//            override fun surfaceChanged(
-//                holder: SurfaceHolder,
-//                format: Int,
-//                width: Int,
-//                height: Int
-//            ) {
-//                startCameraPreview( width, height,false)
-//                }
-//
-//            override fun surfaceDestroyed(holder: SurfaceHolder) {
-//            }
-//        })
-//
-//    }
-//
-//    fun startCameraPreview(width: Int, height: Int, enableFlash: Boolean) {
-//        try {
-//            // TODO
-//            val cameraBkgHandler = Handler()
-//
-//            val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-//
-//            cameraManager.cameraIdList.find {
-//                val characteristics = cameraManager.getCameraCharacteristics(it)
-//                val cameraDirection = characteristics.get(CameraCharacteristics.LENS_FACING)
-//
-//                return@find cameraDirection != null && cameraDirection == CameraCharacteristics.LENS_FACING_BACK
-//            }?.let {
-//                val cameraStateCallback = object : CameraDevice.StateCallback() {
-//                    override fun onOpened(camera: CameraDevice) {
-//
-//                        val barcodeDetector = BarcodeDetector.Builder(context)
-//                            .setBarcodeFormats(Barcode.QR_CODE)
-//                            .build()
-//
-//                        /*when barcode is not functional*/
-//                        if (!barcodeDetector.isOperational) {
-//                            Toast.makeText(context, "Barcode not working", Toast.LENGTH_LONG).show()
-//                        }
-//
-//                        barcodeDetector.setProcessor(object: Detector.Processor<Barcode>{
-//                            override fun release() {
-//                                TODO("Not yet implemented")
-//                            }
-//
-//                            override fun receiveDetections(p0: Detector.Detections<Barcode>) {
-//
-//                                var barcodes = p0.detectedItems
-//                                if (barcodes.size() != 0) {
-//                                    Toast.makeText(context, " working", Toast.LENGTH_LONG).show()
-//                                }
-//                            }
-//
-//                        })
-//
-//                        val cameraSource = CameraSource.Builder(context, barcodeDetector)
-//                            .setRequestedFps(25f)
-//                            .setAutoFocusEnabled(true).build()
-//
-////                        binding.scanSurfaceView.holder.addCallback(surfaceCallBack)
-//
-////                        val imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1)
-////                        imageReader.setOnImageAvailableListener({reader ->
-////                            val cameraImage = reader.acquireNextImage()
-////
-////                            val buffer = cameraImage.planes.first().buffer
-////                            val bytes = ByteArray(buffer.capacity())
-////                            buffer.get(bytes)
-////
-////                            val bitmap = BitmapFactory.decodeByteArray(bytes, 0 , bytes.count(), null)
-////                            val frameToProcess = Frame.Builder().setBitmap(bitmap).build()
-////                            val barcodeResults = barcodeDetector.detect(frameToProcess)
-////
-////                            if (barcodeResults.size() > 0) {
-////                                Log.d(TAG, "onOpened: Barcode Detected!")
-////                                Toast.makeText(context, "Barcode detected", Toast.LENGTH_LONG)
-////                                    .show()
-////                            } else {
-////                                Log.d(TAG, "onOpened: No barcode detected!")
-////                            }
-////
-////                            cameraImage.close()
-////                        }, cameraBkgHandler)
-//
-//
-//                        val captureStateCallback = object : CameraCaptureSession.StateCallback() {
-//                            override fun onConfigured(session: CameraCaptureSession) {
-//                                var builder = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-//                                builder.addTarget(binding.scanSurfaceView.holder.surface)
-//
-//                                if (enableFlash) { builder = enableFlashMode(builder, enableFlash) }
-//
-//                                session.setRepeatingRequest(builder.build(), null, null)
-//
-//                                val request = builder.build()
-//                                session.capture(request, null, null)
-//                            }
-//
-//                            override fun onConfigureFailed(session: CameraCaptureSession) {
-//                                // TODO
-//                                Log.d(TAG, "onConfigureFailed")
-//                            }
-//                        }
-//
-//                        camera.createCaptureSession(
-//                            listOf(binding.scanSurfaceView.holder.surface),
-//                            captureStateCallback,
-//                            cameraBkgHandler
-//                        )
-//                    }
-//
-//                    override fun onClosed(camera: CameraDevice) {
-//                        // TODO
-//                        Log.d(TAG, "onClosed")
-//                    }
-//
-//                    override fun onDisconnected(camera: CameraDevice) {
-//                        // TODO
-//                        Log.d(TAG, "onDisconnected")
-//                    }
-//
-//                    override fun onError(camera: CameraDevice, error: Int) {
-//                        // TODO
-//                        Log.d(TAG, "onError")
-//                    }
-//                }
-//
-//                cameraManager.openCamera(it, cameraStateCallback, cameraBkgHandler)
-//                return
-//            }
-//
-//            // TODO: - No available camera found case
-//
-//        } catch (e: CameraAccessException) {
-//            // TODO
-//            Log.e(TAG, e.message!!)
-//        } catch (e: SecurityException) {
-//            // TODO
-//            Log.e(TAG, e.message!!)
-//        }
-//    }
-
+    /**
+     * Sets and initialises the barcode detector
+     * @param barcodeDetector BarcodeDetector
+     * @return BarcodeDetector
+    * */
     fun setBarcodeDetector(barcodeDetector: BarcodeDetector): BarcodeDetector {
         this.barcodeDetector = barcodeDetector
         return barcodeDetector
     }
-    fun setBarcodeDetector(context: Context, barcodeType: Int): BarcodeDetector {
+
+    /**
+     * Sets and initializes the barcode detector
+     * @param barcodeType Int : This specifies the barcode type e.g Barcode.QR_CODE
+     * @return BarcodeDetector
+    * */
+    fun setBarcodeDetector(barcodeType: Int): BarcodeDetector {
         return BarcodeDetector.Builder(context)
             .setBarcodeFormats(barcodeType)
             .build()
     }
 
+    /**
+     * Sets and initializes the camera source
+     * @param cameraSource camera source
+     * @param detector barcode detector
+     * @return CameraSource
+    * */
     fun setCameraSource(cameraSource: CameraSource, detector: BarcodeDetector): CameraSource{
-        return CameraSource.Builder(context, detector)
-            .setRequestedFps(25f)
-            .setAutoFocusEnabled(true).build()
+        this.cameraSource = cameraSource
+        return cameraSource
     }
 
-
-    /*Enables Flash light*/
-    fun enableFlashMode(builder: CaptureRequest.Builder, mode: Boolean): CaptureRequest.Builder {
-        builder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
-        builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
-        return builder
-    }
-
+    /**
+     * Sets listener for code scanning
+     * @param listener QueueRListener
+    * */
     fun setQueueRListener(listener: QueueRListener) {
         this.listener = listener
     }
 
+    /**
+     * Gets the gallery image button for more control and customizatoin
+     * @return ImageButton
+    * */
     fun getGalleryButton(): ImageButton {
         return binding.galleryImageButton
     }
 
-
+    /**
+     * Decodes barcode
+     * @param uri Uri
+     * @return The scanned barcodes' display value
+    * */
     fun decode(uri: Uri): String? {
         var result: String? = null
         val inputStream  = context.contentResolver.openInputStream(uri)
@@ -396,15 +257,20 @@ class ScanView @JvmOverloads constructor(
         } catch (e: NotFoundException) {
             Log.e(TAG, "scanUri: $e", )
         }
-
-
-
         return result
     }
 
+    //todo create a decode function that returns the barcode object
+
+    /**
+     * Decodes barcode
+     * @param bitmap Bitmap of selected image
+     * @param barcodeType Barcode type e.g Barcode.QR_CODE
+     * @return Barcode
+    * */
     fun decode(bitmap: Bitmap, barcodeType: Int): Barcode {
         //Setup the barcode detector
-        val barcodeDetector = setBarcodeDetector(context, barcodeType)
+        val barcodeDetector = setBarcodeDetector(barcodeType)
 
         if (!barcodeDetector.isOperational) {
             Log.e(TAG, "decode: barcode is not functional" )
@@ -418,9 +284,14 @@ class ScanView @JvmOverloads constructor(
         return barcodes.valueAt(0)
     }
 
+    /**
+     * Decodes barcode
+     * @param bitmap Bitmap of selected image
+     * @return Barcode
+     * */
     fun decode(bitmap: Bitmap): Barcode {
         //Setup the barcode detector
-        val barcodeDetector = setBarcodeDetector(context, Barcode.QR_CODE)
+        val barcodeDetector = setBarcodeDetector(Barcode.QR_CODE)
 
         if (!barcodeDetector.isOperational) {
             Log.e(TAG, "decode: barcode is not functional" )

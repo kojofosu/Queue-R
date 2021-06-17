@@ -27,9 +27,9 @@ allprojects {
 Add the dependency
 
 ```groovy
-	dependencies {
-	        implementation "com.github.kojofosu:Queue-R:$latest_release"
-	}
+dependencies {
+   implementation "com.github.kojofosu:Queue-R:$latest_release"
+}
 ```
 
 
@@ -37,25 +37,24 @@ Add the dependency
 ## Usage
 Sample implementation [here](app/)
 ```xml
-    <com.mcdev.queuer.ScanView
-        android:id="@+id/queuer_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:setFlashIconOverlay="true"/>
-
+     <com.mcdev.queuer.ScanView
+   	android:id="@+id/queuer_view"
+   	android:layout_width="match_parent"
+   	android:layout_height="match_parent"
+   	app:setFlashIconOverlay="true"/>
 ```
 
 - Initialize your scan view
 ```kotlin
-        private lateinit var scanView: ScanView
-        scanView = findViewById<ScanView>(R.id.scan_view)
+	private lateinit var scanView: ScanView
+	scanView = findViewById<ScanView>(R.id.scan_view)
 ```
 
 - Create your barcode detector
 ```kotlin
-        val detector: BarcodeDetector = BarcodeDetector.Builder(this)
-            .setBarcodeFormats(Barcode.QR_CODE)
-            .build()
+	val detector: BarcodeDetector = BarcodeDetector.Builder(this)
+    	    .setBarcodeFormats(Barcode.QR_CODE)
+    	    .build()
 ```
 
 - Create your camera source
@@ -67,10 +66,65 @@ Sample implementation [here](app/)
 ```
 
 - Then start the scanner. 
-	`Note`: Camera permission is required
+
+`NOTE`: Camera permission is required
 ```kotlin
-	scanView.startScan(detector, camerasource)	//TODO camera permission is required.
+	scanView.startScan(detector, camerasource)	//TODO check if camera permission is granted
 ```
+
+- Implement scanner listener to get barcode data
+```kotlin
+	scanView.setQueueRListener(object: QueueRListener{
+            override fun onRetrieved(barcode: Barcode) {
+                var intent = Intent(applicationContext, GetCodeActivity::class.java)
+                intent.putExtra("one", barcode.displayValue)
+                startActivity(intent)
+            }
+        })
+```
+
+### Decoding barcode from gallery
+The gallery's button is exposed for access so you could use that to open any picture picture of your choice.
+
+To get the button call the `getGalleryButton()` method.
+
+`NOTE` Storage permission is required to access phone's gallery
+
+- Open the gallery
+```kotlin
+        val imgbtn = scanView.getGalleryButton() //access the gallery button
+	
+        imgbtn.setOnClickListener {
+            val intent = Intent()
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(intent, REQUEST_CAMERA)
+        }
+```
+
+
+
+- After selecting the preferred picture, call the `decode()` method to decode QR code selected from the gallery
+```kotlin
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (data != null) {
+            val uri = data.data!!
+
+            val decodedValue = scanView.decode(uri)	//decode QR code from gallery
+
+            val intent = Intent(applicationContext, GetCodeActivity::class.java)
+            intent.putExtra("one", decodedValue)
+            startActivity(intent)
+        }
+```
+
+## Credits
+- [Maulana Farhan 🐣 | Dribbble](https://dribbble.com/maulanafaa)
+- [Pixel Perfect | Flaticon](https://www.flaticon.com/authors/pixel-perfect)
+- [Zxing](https://github.com/zxing/zxing)
+- [Lottie Files](https://lottiefiles.com/)
+- [Google's Vision](https://developers.google.com/vision)
 
 
 ### Licensed under the [MIT License](LICENSE)

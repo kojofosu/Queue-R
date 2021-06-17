@@ -35,15 +35,42 @@ Add the dependency
 
 
 ## Usage
-
+Sample implementation [here](app/)
 ```xml
     <com.mcdev.queuer.ScanView
         android:id="@+id/queuer_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        app:setFlashIconOverlay="true"/>
 
 ```
 
+- Initialize your scan view
+```kotlin
+        private lateinit var scanView: ScanView
+        scanView = findViewById<ScanView>(R.id.scan_view)
+```
+
+- Create your barcode detector
+```kotlin
+        val detector: BarcodeDetector = BarcodeDetector.Builder(this)
+            .setBarcodeFormats(Barcode.QR_CODE)
+            .build()
+```
+
+- Create your camera source
+```kotlin
+        val cameraSource =  CameraSource.Builder(this, detector)
+            .setRequestedFps(25f)
+            .setAutoFocusEnabled(true)
+	    .build()
+```
+
+- Then start the scanner. 
+	`Note`: Camera permission is required
+```kotlin
+	scanView.startScan(detector, camerasource)	//TODO camera permission is required.
+```
 
 
 ### Licensed under the [MIT License](LICENSE)

@@ -253,7 +253,7 @@ class ScanView @JvmOverloads constructor(
         try {
             val decodedResult = multiFormatReader.decode(binaryBitmap)
             result = decodedResult.text
-            Log.d(TAG, "scanUri: QR image content : ${result}")
+            Log.d(TAG, "scanUri: QR image content : $result")
         } catch (e: NotFoundException) {
             Log.e(TAG, "scanUri: $e", )
         }

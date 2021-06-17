@@ -35,11 +35,10 @@ class MainActivity : AppCompatActivity(){
             .setAutoFocusEnabled(true).build()
 
 
-        binding.scanView.apply {
-            setBarcodeDetector(detector)
-            setCameraSource(cameraSource, detector)
-            setFlashIconOverlay(true)
-        }
+        binding.scanView.setBarcodeDetector(detector)
+        binding.scanView.setCameraSource(cameraSource, detector)
+        binding.scanView.setFlashIconOverlay(true)
+
 
 
         val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity(){
 
         binding.scanView.setQueueRListener(object: QueueRListener{
             override fun onRetrieved(barcode: Barcode) {
-                var intent = Intent(applicationContext, GetCodeActivity::class.java)
+                val intent = Intent(applicationContext, GetCodeActivity::class.java)
                 intent.putExtra("one", barcode.displayValue)
                 startActivity(intent)
             }

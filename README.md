@@ -78,7 +78,7 @@ Sample implementation [here](app/)
 ```kotlin
 	scanView.setQueueRListener(object: QueueRListener{
             override fun onRetrieved(barcode: Barcode) {
-                var intent = Intent(applicationContext, GetCodeActivity::class.java)
+                val intent = Intent(applicationContext, GetCodeActivity::class.java)
                 intent.putExtra("key", barcode.displayValue)
                 startActivity(intent)
             }

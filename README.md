@@ -38,6 +38,13 @@ dependencies {
 
 ## Usage
 Sample implementation [here](app/)
+
+- Add Camera permission in your `AndroidManifest.xml` file
+```xml
+    <uses-permission android:name="android.permission.CAMERA"/>
+```
+
+- Add ScanView layout in your xml file
 ```xml
      <com.mcdev.queuer.ScanView
     	android:id="@+id/queuer_view"

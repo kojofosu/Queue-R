@@ -40,24 +40,25 @@ class MainActivity : AppCompatActivity(){
         binding.scanView.setFlashIconOverlay(true)
 
 
+        binding.scanView.initGalleryButton(this@MainActivity.activityResultRegistry)
 
-        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
-            val result = binding.scanView.decode(uri!!)
-
-            val intent = Intent(applicationContext, GetCodeActivity::class.java)
-            intent.putExtra("one", result)
-            startActivity(intent)
-
-        }
-
-        val imgbtn = binding.scanView.getGalleryButton()
-        imgbtn.setOnClickListener {
-            intent = Intent()
-            intent.type = "image/*"
-            intent.action = Intent.ACTION_GET_CONTENT
-
-            getContent.launch("image/*")
-        }
+//        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
+//            val result = binding.scanView.decode(uri!!)
+//
+//            val intent = Intent(applicationContext, GetCodeActivity::class.java)
+//            intent.putExtra("one", result)
+//            startActivity(intent)
+//
+//        }
+//
+//        val imgbtn = binding.scanView.getGalleryButton()
+//        imgbtn.setOnClickListener {
+//            intent = Intent()
+//            intent.type = "image/*"
+//            intent.action = Intent.ACTION_GET_CONTENT
+//
+//            getContent.launch("image/*")
+//        }
 
 
 
@@ -89,7 +90,7 @@ class MainActivity : AppCompatActivity(){
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
             && requestCode == REQUEST_CAMERA) {
-//                binding.scanView.testSurface()
+//                binding.scanView.startScan()
         }
     }
 

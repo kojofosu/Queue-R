@@ -40,10 +40,10 @@ dependencies {
 Sample implementation [here](app/)
 ```xml
      <com.mcdev.queuer.ScanView
-   	android:id="@+id/queuer_view"
-   	android:layout_width="match_parent"
-   	android:layout_height="match_parent"
-   	app:setFlashIconOverlay="true"/>
+    	android:id="@+id/queuer_view"
+       	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	app:setFlashIconOverlay="true"/>
 ```
 
 - Initialize your scan view
@@ -79,14 +79,20 @@ Sample implementation [here](app/)
 	scanView.setQueueRListener(object: QueueRListener{
             override fun onRetrieved(barcode: Barcode) {
                 var intent = Intent(applicationContext, GetCodeActivity::class.java)
-                intent.putExtra("one", barcode.displayValue)
+                intent.putExtra("key", barcode.displayValue)
                 startActivity(intent)
             }
         })
 ```
 
-### Decoding barcode from gallery
-The gallery's button is exposed for access so you could use that to open any picture picture of your choice.
+## Decoding barcode from gallery
+- Initialize the gallery button to access gallery and decode QR code from gallery
+```kotlin
+    scanView.initGalleryButton(this@MainActivity.activityResultRegistry)
+```
+
+### Customizing gallery button
+The gallery's button is exposed for access so you could use that to open any third party gallery picker of your choice.
 
 To get the button call the `getGalleryButton()` method.
 
@@ -119,6 +125,7 @@ To get the button call the `getGalleryButton()` method.
             intent.putExtra("one", decodedValue)
             startActivity(intent)
         }
+    }
 ```
 
 ## Credits

@@ -6,13 +6,15 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.hardware.Camera
-import android.hardware.camera2.CaptureRequest
 import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.widget.ImageButton
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.util.isNotEmpty
@@ -46,13 +48,16 @@ class ScanView @JvmOverloads constructor(
     private lateinit var barcodeDetector: BarcodeDetector
     private lateinit var cameraSource: CameraSource
 
-    constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0,
-        listener: QueueRListener) : this(context, attrs, defStyleAttr) {
-        this.listener = listener
-    }
+    private val OPEN_GALLERY = "OPEN_GALLERY"
+    private var registry: ActivityResultRegistry? = null
+
+//    constructor(
+//        context: Context,
+//        attrs: AttributeSet? = null,
+//        defStyleAttr: Int = 0,
+//        listener: QueueRListener) : this(context, attrs, defStyleAttr) {
+//        this.listener = listener//todo
+//    }
 
     init {
         //load style attributes
@@ -61,7 +66,27 @@ class ScanView @JvmOverloads constructor(
         val flashIconOverlay = attributes.getBoolean(R.styleable.ScanView_setFlashIconOverlay, true)
 
         setFlashIconOverlay(flashIconOverlay)
+
+        binding.galleryImageButton.setOnClickListener {
+            initGalleryButton(registry!!).launch(Utils.IMAGE_MIME_TYPE)
+        }
     }
+
+    /**
+     * Initializes the gallery button to allow image selection in gallery
+     * @param registry ActivityResultRegistry
+    * */
+    fun initGalleryButton(registry: ActivityResultRegistry): ActivityResultLauncher<String> {
+        this.registry = registry
+        return registry.register(OPEN_GALLERY , ActivityResultContracts.GetContent()){ uri: Uri? ->
+            val bitmap = Utils.getBitmapFromUri(context, uri!!)
+            val barcode = decode(bitmap)
+
+            Log.d(TAG, "initGalleryButton: $barcode")
+            this.listener?.onRetrieved(barcode)
+        }
+    }
+
 
 
     /**
@@ -260,7 +285,7 @@ class ScanView @JvmOverloads constructor(
         return result
     }
 
-    //todo create a decode function that returns the barcode object
+    //todo create a decode function that returns the barcode object with uri parameter
 
     /**
      * Decodes barcode
@@ -305,3 +330,4 @@ class ScanView @JvmOverloads constructor(
         return barcodes.valueAt(0)
     }
 }
+

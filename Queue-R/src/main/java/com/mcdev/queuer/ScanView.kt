@@ -218,9 +218,12 @@ class ScanView @JvmOverloads constructor(
      * @return BarcodeDetector
     * */
     fun setBarcodeDetector(barcodeType: Int): BarcodeDetector {
-        return BarcodeDetector.Builder(context)
+        val barcodeDetector = BarcodeDetector.Builder(context)
             .setBarcodeFormats(barcodeType)
             .build()
+
+        this.barcodeDetector = barcodeDetector
+        return barcodeDetector
     }
 
     /**
@@ -231,8 +234,15 @@ class ScanView @JvmOverloads constructor(
     * */
     fun setCameraSource(cameraSource: CameraSource, detector: BarcodeDetector): CameraSource{
         this.cameraSource = cameraSource
+        this.barcodeDetector = detector
         return cameraSource
     }
+
+    fun setCameraSource(cameraSource: CameraSource): CameraSource{
+        this.cameraSource = cameraSource
+        return cameraSource
+    }
+
 
     /**
      * Sets listener for code scanning

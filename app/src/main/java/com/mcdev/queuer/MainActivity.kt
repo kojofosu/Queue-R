@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(){
             .setAutoFocusEnabled(true).build()
 
 
-        binding.scanView.setBarcodeDetector(detector)
+//        binding.scanView.setBarcodeDetector(detector)
         binding.scanView.setCameraSource(cameraSource, detector)
         binding.scanView.setFlashIconOverlay(true)
 

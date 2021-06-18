@@ -122,7 +122,7 @@ To get the button call the `getGalleryButton()` method.
             val decodedValue = scanView.decode(uri)	//decode QR code from gallery
 
             val intent = Intent(applicationContext, GetCodeActivity::class.java)
-            intent.putExtra("one", decodedValue)
+            intent.putExtra("key", decodedValue)
             startActivity(intent)
         }
     }

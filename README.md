@@ -1,5 +1,5 @@
 # Queue-R
-[![](https://jitpack.io/v/kojofosu/Queue-R.svg?style=for-the-badge)](https://jitpack.io/#kojofosu/Queue-R)
+![Jit](https://img.shields.io/jitpack/v/github/kojofosu/Queue-R?style=for-the-badge)
 
 An android library to help implement a QR scanner interface
 

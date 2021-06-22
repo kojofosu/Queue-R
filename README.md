@@ -102,10 +102,6 @@ Sample implementation [here](app/)
 ```
 
 ## Decoding barcode from gallery
-- Initialize the gallery button to access gallery and decode QR code from gallery
-```kotlin
-    scanView.initGalleryButton(this@MainActivity.activityResultRegistry)
-```
 
 ### Customizing gallery button
 The gallery's button is exposed for access so you could use that to open any third party gallery picker of your choice.

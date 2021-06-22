@@ -74,11 +74,16 @@ Sample implementation [here](app/)
 	    .build()
 ```
 
+- initialize scanner
+```kotlin
+    scanView.initialize(detector, cameraSource, this.activityResultRegistry)
+```
+
 - Then start the scanner. 
 
 `NOTE`: Camera permission is required
 ```kotlin
-	scanView.startScan(detector, camerasource)	//TODO check if camera permission is granted
+	scanView.startScan()	//TODO check if camera permission is granted
 ```
 
 - Implement scanner listener to get barcode data
@@ -89,6 +94,10 @@ Sample implementation [here](app/)
                 intent.putExtra("key", barcode.displayValue)
                 startActivity(intent)
             }
+            override fun onFailed(message: String) {
+                //TODO("Not yet implemented")
+            }
+
         })
 ```
 

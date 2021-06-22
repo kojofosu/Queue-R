@@ -49,15 +49,7 @@ class ScanView @JvmOverloads constructor(
     private lateinit var cameraSource: CameraSource
 
     private val OPEN_GALLERY = "OPEN_GALLERY"
-    private var registry: ActivityResultRegistry? = null
-
-//    constructor(
-//        context: Context,
-//        attrs: AttributeSet? = null,
-//        defStyleAttr: Int = 0,
-//        listener: QueueRListener) : this(context, attrs, defStyleAttr) {
-//        this.listener = listener//todo
-//    }
+    private lateinit var registry: ActivityResultRegistry
 
     init {
         //load style attributes
@@ -68,7 +60,7 @@ class ScanView @JvmOverloads constructor(
         setFlashIconOverlay(flashIconOverlay)
 
         binding.galleryImageButton.setOnClickListener {
-            initGalleryButton(registry!!).launch(Utils.IMAGE_MIME_TYPE)
+            initGalleryButton(registry).launch(Utils.IMAGE_MIME_TYPE)
         }
     }
 
@@ -77,7 +69,6 @@ class ScanView @JvmOverloads constructor(
      * @param registry ActivityResultRegistry
     * */
     private fun initGalleryButton(registry: ActivityResultRegistry): ActivityResultLauncher<String> {
-//        this.registry = registry
         return registry.register(OPEN_GALLERY , ActivityResultContracts.GetContent()){ uri: Uri? ->
             val bitmap = Utils.getBitmapFromUri(context, uri!!)
             val barcode = decode(bitmap)
@@ -121,8 +112,8 @@ class ScanView @JvmOverloads constructor(
      * @param cameraSource CameraSource
      *  */
     @RequiresPermission("android.permission.CAMERA", conditional = false)
-    fun startScan(barcodeDetector: BarcodeDetector = this.barcodeDetector, cameraSource: CameraSource = this.cameraSource, registry: ActivityResultRegistry = this.registry!!) {
-
+    fun startScan() {
+        //initialize gallery button
         initGalleryButton(registry)
         barcodeDetector.setProcessor(object : Detector.Processor<Barcode>{
             override fun release() {
@@ -359,4 +350,3 @@ class ScanView @JvmOverloads constructor(
         return barcodes.valueAt(0)
     }
 }
-

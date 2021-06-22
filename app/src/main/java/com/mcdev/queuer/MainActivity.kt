@@ -35,10 +35,7 @@ class MainActivity : AppCompatActivity(){
             .setAutoFocusEnabled(true).build()
 
 
-        binding.scanView.setBarcodeDetector(detector)
-        binding.scanView.setCameraSource(cameraSource)
-        binding.scanView.setFlashIconOverlay(true)
-        binding.scanView.setActivityResultRegistry(this.activityResultRegistry)
+        binding.scanView.initialize(detector, cameraSource, this.activityResultRegistry)
 
 
 //        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
@@ -66,6 +63,10 @@ class MainActivity : AppCompatActivity(){
                 val intent = Intent(applicationContext, GetCodeActivity::class.java)
                 intent.putExtra("one", barcode.displayValue)
                 startActivity(intent)
+            }
+
+            override fun onFailed(message: String) {
+                //TODO("Not yet implemented")
             }
         })
 

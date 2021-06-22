@@ -35,12 +35,11 @@ class MainActivity : AppCompatActivity(){
             .setAutoFocusEnabled(true).build()
 
 
-//        binding.scanView.setBarcodeDetector(detector)
-        binding.scanView.setCameraSource(cameraSource, detector)
+        binding.scanView.setBarcodeDetector(detector)
+        binding.scanView.setCameraSource(cameraSource)
         binding.scanView.setFlashIconOverlay(true)
+        binding.scanView.setActivityResultRegistry(this.activityResultRegistry)
 
-
-        binding.scanView.initGalleryButton(this@MainActivity.activityResultRegistry)
 
 //        val getContent = registerForActivityResult(ActivityResultContracts.GetContent()){ uri: Uri? ->
 //            val result = binding.scanView.decode(uri!!)

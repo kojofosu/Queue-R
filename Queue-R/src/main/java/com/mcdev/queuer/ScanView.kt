@@ -76,8 +76,8 @@ class ScanView @JvmOverloads constructor(
      * Initializes the gallery button to allow image selection in gallery
      * @param registry ActivityResultRegistry
     * */
-    fun initGalleryButton(registry: ActivityResultRegistry): ActivityResultLauncher<String> {
-        this.registry = registry
+    private fun initGalleryButton(registry: ActivityResultRegistry): ActivityResultLauncher<String> {
+//        this.registry = registry
         return registry.register(OPEN_GALLERY , ActivityResultContracts.GetContent()){ uri: Uri? ->
             val bitmap = Utils.getBitmapFromUri(context, uri!!)
             val barcode = decode(bitmap)
@@ -102,13 +102,28 @@ class ScanView @JvmOverloads constructor(
     }
 
     /**
+     * Initializes the scanner
+     * @param barcodeDetector
+     * @param cameraSource
+     * @param activityResultRegistry
+     * */
+    fun initialize(barcodeDetector: BarcodeDetector,
+                   cameraSource: CameraSource,
+                   activityResultRegistry: ActivityResultRegistry) {
+        this.barcodeDetector = barcodeDetector
+        this.cameraSource = cameraSource
+        this.registry = activityResultRegistry
+    }
+
+    /**
     *Initialize scan view and starts scan
      * @param barcodeDetector BarcodeDetector
      * @param cameraSource CameraSource
      *  */
     @RequiresPermission("android.permission.CAMERA", conditional = false)
-    fun startScan(barcodeDetector: BarcodeDetector = this.barcodeDetector, cameraSource: CameraSource = this.cameraSource) {
+    fun startScan(barcodeDetector: BarcodeDetector = this.barcodeDetector, cameraSource: CameraSource = this.cameraSource, registry: ActivityResultRegistry = this.registry!!) {
 
+        initGalleryButton(registry)
         barcodeDetector.setProcessor(object : Detector.Processor<Barcode>{
             override fun release() {
 
@@ -250,6 +265,10 @@ class ScanView @JvmOverloads constructor(
     * */
     fun setQueueRListener(listener: QueueRListener) {
         this.listener = listener
+    }
+
+    fun setActivityResultRegistry(activityResultRegistry: ActivityResultRegistry) {
+        this.registry = activityResultRegistry
     }
 
     /**

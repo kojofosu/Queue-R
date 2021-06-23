@@ -42,12 +42,12 @@ class ScanView @JvmOverloads constructor(
     private val layoutInflater = LayoutInflater.from(context)
     private val binding = ScanViewBinding.inflate(layoutInflater, this, true)
 
-    private lateinit var surfaceHolder: SurfaceHolder
-    var isFlashEnabled: Boolean = false
+    private var isFlashEnabled: Boolean = false
     private var listener: QueueRListener? = null
     private lateinit var barcodeDetector: BarcodeDetector
     private lateinit var cameraSource: CameraSource
 
+    private var getContent: ActivityResultLauncher<String>? = null
     private val OPEN_GALLERY = "OPEN_GALLERY"
     private lateinit var registry: ActivityResultRegistry
 
@@ -60,7 +60,7 @@ class ScanView @JvmOverloads constructor(
         setFlashIconOverlay(flashIconOverlay)
 
         binding.galleryImageButton.setOnClickListener {
-            initGalleryButton(registry).launch(Utils.IMAGE_MIME_TYPE)
+            getContent!!.launch(Utils.IMAGE_MIME_TYPE)
         }
     }
 
@@ -71,10 +71,7 @@ class ScanView @JvmOverloads constructor(
     private fun initGalleryButton(registry: ActivityResultRegistry): ActivityResultLauncher<String> {
         return registry.register(OPEN_GALLERY , ActivityResultContracts.GetContent()){ uri: Uri? ->
             val bitmap = Utils.getBitmapFromUri(context, uri!!)
-            val barcode = decode(bitmap)
-
-            Log.d(TAG, "initGalleryButton: $barcode")
-            this.listener?.onRetrieved(barcode)
+            decode(bitmap)
         }
     }
 
@@ -114,7 +111,7 @@ class ScanView @JvmOverloads constructor(
     @RequiresPermission("android.permission.CAMERA", conditional = false)
     fun startScan() {
         //initialize gallery button
-        initGalleryButton(registry)
+        getContent = initGalleryButton(registry)
         barcodeDetector.setProcessor(object : Detector.Processor<Barcode>{
             override fun release() {
 
@@ -281,7 +278,7 @@ class ScanView @JvmOverloads constructor(
         var bitmap = BitmapFactory.decodeStream(inputStream)
 
         if (bitmap == null) {
-            Log.e(TAG, "scanUri: Invalid bitmap uri : ${uri.toString()}")
+            Log.e(TAG, "scanUri: Invalid bitmap uri : $uri")
         }
 
         val width = bitmap.width
@@ -290,7 +287,7 @@ class ScanView @JvmOverloads constructor(
         val pixels = IntArray(width * height)
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
         bitmap.recycle()
-        bitmap = null //todo investigate
+        bitmap = null
 
         val rgbLuminanceSource = RGBLuminanceSource(width, height, pixels)
         val binaryBitmap = BinaryBitmap(HybridBinarizer(rgbLuminanceSource))
@@ -313,20 +310,32 @@ class ScanView @JvmOverloads constructor(
      * @param barcodeType Barcode type e.g Barcode.QR_CODE
      * @return Barcode
     * */
-    fun decode(bitmap: Bitmap, barcodeType: Int): Barcode {
-        //Setup the barcode detector
-        val barcodeDetector = setBarcodeDetector(barcodeType)
+    fun decode(bitmap: Bitmap, barcodeType: Int): Barcode? {
+        var barcode: Barcode? = null
+        try {
+            //Setup the barcode detector
+            val barcodeDetector = setBarcodeDetector(barcodeType)
 
-        if (!barcodeDetector.isOperational) {
-            Log.e(TAG, "decode: barcode is not functional" )
+            if (!barcodeDetector.isOperational) {
+                Log.e(TAG, "decode: barcode is not functional")
+                listener?.onFailed("Barcode detector is not functional!")
+            }
+
+            //Detect the barcode
+            val frame = Frame.Builder().setBitmap(bitmap).build()
+            val barcodes = barcodeDetector.detect(frame)
+            barcode = barcodes.valueAt(0)
+
+            this.listener?.onRetrieved(barcode)
+
+            //Decode the barcode
+            return barcode
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "decode: $e")
+            listener?.onFailed(e.toString())
+            return barcode
         }
 
-        //Detect the barcode
-        val frame = Frame.Builder().setBitmap(bitmap).build()
-        val barcodes = barcodeDetector.detect(frame)
-
-        //Decode the barcode
-        return barcodes.valueAt(0)
     }
 
     /**
@@ -334,19 +343,31 @@ class ScanView @JvmOverloads constructor(
      * @param bitmap Bitmap of selected image
      * @return Barcode
      * */
-    fun decode(bitmap: Bitmap): Barcode {
-        //Setup the barcode detector
-        val barcodeDetector = setBarcodeDetector(Barcode.QR_CODE)
+    fun decode(bitmap: Bitmap): Barcode? {
+        var barcode: Barcode? = null
+        try {
+            //Setup the barcode detector
+            val barcodeDetector = setBarcodeDetector(Barcode.QR_CODE)
 
-        if (!barcodeDetector.isOperational) {
-            Log.e(TAG, "decode: barcode is not functional" )
+            if (!barcodeDetector.isOperational) {
+                Log.e(TAG, "decode: barcode is not functional")
+                listener?.onFailed("Barcode detector is not functional!")
+            }
+
+            //Detect the barcode
+            val frame = Frame.Builder().setBitmap(bitmap).build()
+            val barcodes = barcodeDetector.detect(frame)
+            barcode = barcodes.valueAt(0)
+
+            this.listener?.onRetrieved(barcode)
+
+            //Decode the barcode
+            return barcode
+        } catch (e: java.lang.Exception) {
+            Log.e(TAG, "decode: $e")
+            listener?.onFailed(e.toString())
+            return barcode
         }
 
-        //Detect the barcode
-        val frame = Frame.Builder().setBitmap(bitmap).build()
-        val barcodes = barcodeDetector.detect(frame)
-
-        //Decode the barcode
-        return barcodes.valueAt(0)
     }
 }

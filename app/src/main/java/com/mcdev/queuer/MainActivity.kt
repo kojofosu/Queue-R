@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -66,7 +67,7 @@ class MainActivity : AppCompatActivity(){
             }
 
             override fun onFailed(message: String) {
-                //TODO("Not yet implemented")
+                Log.d("TAG", "onFailed: $message")
             }
         })
 

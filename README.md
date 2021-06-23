@@ -72,7 +72,7 @@ Sample implementation [here](app/)
         val cameraSource =  CameraSource.Builder(this, detector)
             .setRequestedFps(25f)
             .setAutoFocusEnabled(true)
-	    .build()
+	        .build()
 ```
 
 - initialize scanner
@@ -96,7 +96,7 @@ Sample implementation [here](app/)
                 startActivity(intent)
             }
             override fun onFailed(message: String) {
-                //TODO("Not yet implemented")
+                Log.e(TAG, "onFailed: $message")
             }
 
         })

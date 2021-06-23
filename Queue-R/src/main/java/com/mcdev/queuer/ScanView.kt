@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.util.isNotEmpty
+import com.airbnb.lottie.LottieDrawable
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.Frame
@@ -112,6 +113,10 @@ class ScanView @JvmOverloads constructor(
     fun startScan() {
         //initialize gallery button
         getContent = initGalleryButton(registry)
+
+        //start scan animation overlay
+        binding.scanAnimationOverlay.visibility = VISIBLE
+
         barcodeDetector.setProcessor(object : Detector.Processor<Barcode>{
             override fun release() {
 

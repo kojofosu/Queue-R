@@ -36,11 +36,13 @@
                     android:layout_height="match_parent"/>
 
                 <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/scan_animation_overlay"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:lottie_rawRes="@raw/lf30_editor_cvex8iti"
                     app:lottie_autoPlay="true"
-                    app:lottie_loop="true"/>
+                    app:lottie_loop="true"
+                    android:visibility="gone"/>
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/flash_animation_view"

@@ -7,6 +7,7 @@ Design inspiration and credit goes to ([Maulana Farhan 🐣 | Dribbble](https://
 
 ![image](resources/inspired_image.jpg)
 
+[Demo](https://user-images.githubusercontent.com/20203694/123064978-43591e80-d3fe-11eb-9683-6061ac19115b.mp4)
 ## Prerequisites
 
 - Request  📸`CAMERA` and 📂`STORAGE` permissions. Read more [Android Permissions](https://developer.android.com/guide/topics/permissions/overview)
